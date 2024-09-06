@@ -164,7 +164,3 @@ def main():
 # Ejecutar el programa
 if __name__ == "__main__":
     main()
-
-# CASO TINSA: -33.40890, -70.55164
-#avenida tomas moro 20, las condes, chile
-#av: 70,5699767°W 33,4279546°S 
