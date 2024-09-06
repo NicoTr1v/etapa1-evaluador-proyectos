@@ -34,31 +34,34 @@ Para que el script sea funcional es necesario que la información de cada normat
 
 *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*
 
-La Imagen 2 muestra el formato esperado para las combinaciones de normativas disponibles en una zona. Esta tabla debe componerse la siguientes columnas:
+La Imagen 2 muestra el formato esperado para las combinaciones de normativas disponibles en una zona. Esta tabla se compone de varias columnas con información, sin embargo, las relevantes para este script son:
 
 - cod: (*str*) código que se compone de siglas uso de suelo/siglas zona edificación, este código no es único, ya que es un código que permite unir después a cada zona en la capa geográfica con todas las combinaciones de normativas disponibles y cada zona como bien muestra la Imagen 1, se tienen distintas combinaciones de normativa para cada cod.
 - uso_zona: (*str*) siglas asociadas al uso de suelo de la zona.
 - zona: (*str*) siglas de la zona.
 - nombre: (*str*) nombre y significado de las siglas de la zona.
-- uso_permitido: (*str*) uso permitido en la zona.
-- uso_prohibido:  (*str*)nuso prohibido en la zona.
 - obervacion:  (*str*)observación importante sobre la normativa de la zona.
 - normativa_edificacion: (*str*) tipo de normativa aplicable, puede ser: Residencial, Equipamiento, Densificación Residencial, Densificación no Residencial, Áreas verdes y Única. Para estas últimas está prohibido la edificación (el script lo explicita). También el script funciona solo para aplicación de tipo de normativa Residencial y Densificación Residencial.
-- subdivision_predial_minima: (float) Subdivisión predial mínima admitida en la zona.
-- subdivision_predial_maxima: (*float*) Subdivisión predial máxima admitida en la zona.
 - densidad_bruta_maxima: (float) Densidad Bruta Máxima en la zona, en habitantes/hectáreas, se considera 4 habitantes por vivienda (O.G.U.C).
 - constructibilidad:  (*float*) Coeficiente de Constructibilidad, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir sobre el terreno.
 - ocupacion_1er_piso:  (*float*) Coeficiente de Ocupación en el 1er Piso, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir en el primer piso.
+- altura_maxima_pisos: (*int*) altura máxima permitida en pisos, la O.G.U.C permite considerar hasta 3,5 metros por piso, sin embargo, en el mercado se suele usar 2,5 metros.
+- altura_maxima_mts: (*float*) altura máxima permitida en metros, aplicado con 3,5 metros por piso. En algunos casos se específica solo en pisos por lo que se hace el calculo con los valores ya mencionados, en otros específica ambos valores.
+
+### A considerar: 
+
+La tabla Excel que se utiliza trae más columnas, que dependiendo la escalabilidad, serán de importancia, estasson:
+
+- uso_prohibido:  (*str*)nuso prohibido en la zona.
+- uso_permitido: (*str*) uso permitido en la zona.
+- subdivision_predial_minima: (float) Subdivisión predial mínima admitida en la zona.
+- subdivision_predial_maxima: (*float*) Subdivisión predial máxima admitida en la zona.
 - ocupacion_2do_piso: (*float*) Coeficiente de Ocupación en el 2do Piso, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir en el segundo piso.
 - ocupacion_3er_piso: (*float*) Coeficiente de Ocupación en el 3er Piso, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir en el tercer piso.
 - ocupacion_pisos_superiores: (*float*) Coeficiente de Ocupación en los pisos superiores.
-- altura_maxima_pisos: (*int*) altura máxima permitida en pisos, la O.G.U.C permite considerar hasta 3,5 metros por piso, sin embargo, en el mercado se suele usar 2,5 metros.
-- altura_maxima_mts: (*float*) altura máxima permitida en metros, aplicado con 3,5 metros por piso. En algunos casos se específica solo en pisos por lo que se hace el calculo con los valores ya mencionados, en otros específica ambos valores.
 - rasante: (*str*) Rasante de la edificación en grados.
 - agrupamiento: (*str*) Sistema de Agrupamiento de las edificaciones permitido.
 - antejardin: (*float*) espacio entre línea oficial de la vía y la edificación a dejar como Antejardín en metros.
-
-**A considerar:** 
 
 - **Los coeficientes de ocupación varían en cada comuna, en algunos se específica hasta el del 3er piso, otros solo 1er piso y superiores. Para el caso de Las Condes, solo se específica el coeficiente para el primer piso, lo que indica que la ocupación es pisos superiores está dada por lo restante entre lo que determina el coeficiente de constructibilidad.**
 - **Donde no hay valores se reemplazó con un “-”, además, si hay columnas que no tienen valores, significa que la comuna de Las Condes no los informa, sin embargo otras si, por lo que si se quiere hacer escalable a la Región Metropolitana se mantienen.**
@@ -77,6 +80,13 @@ La Imagen 3 muestra como es la capa, cada zona tiene el código (*cod*), el cual
 
 - Python 3.x
 - pip
+	- Librerías: (también están en requirements.txt)
+		- geopandas==0.14.4
+		- osmnx==1.9.4
+		- pandas==2.2.2
+		- numpy==1.26.4
+		- shapely==2.0.6
+		- openpyxl==3.1.5
 - git
 
 # Configuración del Entorno
@@ -153,85 +163,75 @@ A continuación, se indican las principales funciones utilizadas en el código j
 
 ### 1. **`cargar_datos(geojson_path, excel_path, crs='EPSG:4326')`**
 
-- **Descripción**: Carga un archivo geográfico de las zonas de edificación de la comuna (GeoJSON) y las normativas asociadas a cada una de ellas(Excel), fusionándolos en un `GeoDataFrame`. Convierte el sistema de referencia espacial a `EPSG:4326`.
+- **Descripción**: Carga los datos geoespaciales (GeoJSON) y las normativas (Excel), fusionándolos en un `GeoDataFrame`. Transforma los datos al sistema de referencia espacial `EPSG:4326`.
 - **Entrada**:
-    - `geojson_path`: Ruta al archivo GeoJSON que contiene las zonas.
+    - `geojson_path`: Ruta al archivo GeoJSON con los datos de zonificación.
     - `excel_path`: Ruta al archivo Excel con las normativas.
     - `crs`: Sistema de referencia espacial (por defecto 'EPSG:4326').
 - **Salida**:
-    - `area`: Un `GeoDataFrame` que contiene la zonificación geográfica combinada con la normativa, transformado al CRS especificado.
+    - `zonificacion`: Un `GeoDataFrame` que combina la zonificación geográfica y las normativas, transformado al CRS especificado.
 
 ---
 
 ### 2. **`obtener_geometria()`**
 
-- **Descripción**: Solicita al usuario una dirección o coordenadas. Luego convierte esa entrada en un `GeoDataFrame` que representa la ubicación como un punto (`Point`).
+- **Descripción**: Solicita al usuario una dirección o coordenadas, y convierte esa entrada en un `GeoDataFrame` con un punto (`Point`) geoespacial que representa la ubicación.
 - **Entrada**:
     - No recibe argumentos, pero solicita al usuario:
-        - Si elige `1`, se solicita una dirección para convertirla a coordenadas.
-        - Si elige `2`, se piden coordenadas de longitud (`lon`) y latitud (`lat`).
+        - Dirección (si selecciona `1`).
+        - Coordenadas de longitud (`lon`) y latitud (`lat`) (si selecciona `2`).
 - **Salida**:
-    - Un `GeoDataFrame` con una geometría de tipo `Point` que representa la ubicación proporcionada por el usuario.
+    - `point`: Un `GeoDataFrame` con una geometría `Point` que representa la ubicación ingresada por el usuario.
 
 ---
 
-### 3. **`procesar_zona(area, point)`**
+### 3. **`procesar_zona(zonificacion, point)`**
 
-- **Descripción**: Interseca el punto geográfico ingresado por el usuario con el área de zonificación. Muestra la información de uso de suelo y la normativa correspondiente si la zona permite edificación.
+- **Descripción**: Realiza la intersección del punto ingresado con la zonificación. Si el punto está en una zona permitida, muestra información sobre el uso del suelo, la normativa de edificación y el nombre de la zona.
 - **Entrada**:
-    - `area`: Un `GeoDataFrame` con la zona de edificación y sus normativas.
-    - `point`: Un `GeoDataFrame` con la geometría del punto de la ubicación ingresada por el usuario.
+    - `zonificacion`: Un `GeoDataFrame` que contiene la zonificación geográfica y normativas.
+    - `point`: Un `GeoDataFrame` que contiene la geometría del punto de la ubicación ingresada.
 - **Salida**:
-    - `zona_prc`: Un `GeoDataFrame` que contiene la zona donde se ubica el punto. Si la zona no permite edificación, el programa termina.
+    - `zona_prc`: Un `GeoDataFrame` que contiene la zona donde se encuentra el punto. Si la zona no permite edificación, el programa se cierra.
 
 ---
 
 ### 4. **`elige_normativa(zona_prc)`**
 
-- **Descripción**: Filtra las normativas residenciales disponibles en la zona e imprime las opciones. Luego, permite al usuario seleccionar una normativa aplicable.
+- **Descripción**: Filtra las normativas residenciales disponibles en la zona, imprime las opciones y permite al usuario seleccionar una normativa aplicable.
 - **Entrada**:
-    - `zona_prc`: Un `GeoDataFrame` que contiene las normativas de la zona donde se ubica el terreno.
+    - `zona_prc`: Un `GeoDataFrame` que contiene las normativas disponibles para la zona en la que se ubica el terreno.
 - **Salida**:
-    - Un `GeoDataFrame` con la normativa seleccionada por el usuario.
+    - Un `GeoDataFrame` que contiene la normativa seleccionada por el usuario.
 
 ---
 
-### 5. **`ingresar_superficie()`**
+### 5. **`calcular_restricciones(normativa_elegida)`**
 
-- **Descripción**: Solicita al usuario que ingrese la superficie del terreno en metros cuadrados.
+- **Descripción**: Calcula las restricciones de construcción basadas en la normativa seleccionada por el usuario y la superficie del terreno ingresada. Muestra:
+    - Superficie máxima construible.
+    - Ocupación máxima del suelo en el primer piso.
+    - Cantidad máxima de viviendas permitidas.
+    - Altura máxima permitida (en pisos).
 - **Entrada**:
-    - No recibe argumentos.
-- **Salida**:
-    - Un número que representa la superficie ingresada por el usuario en metros cuadrados.
-
----
-
-### 6. **`calcular_restricciones(superficie, normativa_elegida)`**
-
-- **Descripción**: Calcula las restricciones de construcción basadas en la normativa seleccionada y la superficie del terreno. Muestra la superficie máxima construible, la ocupación del suelo en el primer piso, y la cantidad máxima de viviendas permitidas.
-- **Entrada**:
-    - `superficie`: La superficie del terreno en metros cuadrados.
     - `normativa_elegida`: El `GeoDataFrame` con la normativa seleccionada por el usuario.
 - **Salida**:
-    - No tiene una salida directa, pero imprime:
-        - Superficie máxima construible.
-        - Ocupación máxima en el primer piso.
-        - Número máximo de viviendas permitidas.
+    - No tiene una salida directa, pero imprime los cálculos de restricciones.
 
 ---
 
-### 7. **`main()`**
+### 6. **`main()`**
 
-- **Descripción**: Coordina el flujo del programa:
+- **Descripción**: Es la función principal que coordina todo el flujo del programa:
     - Carga los datos geoespaciales y normativos.
-    - Solicita la ubicación del usuario y procesa la zona.
-    - Permite seleccionar la normativa aplicable.
-    - Pide la superficie del terreno.
-    - Calcula las restricciones basadas en la normativa seleccionada.
+    - Solicita la ubicación del usuario (dirección o coordenadas).
+    - Procesa la zonificación para obtener la normativa aplicable.
+    - Permite al usuario elegir una normativa residencial.
+    - Calcula y muestra las restricciones de edificación basadas en la normativa y la superficie del terreno.
 - **Entrada**:
     - No recibe argumentos.
 - **Salida**:
-    - No tiene salida directa, coordina la ejecución de las funciones.
+    - No tiene una salida directa, pero coordina la ejecución de las funciones.
 
 ---
 
@@ -239,21 +239,29 @@ A continuación, se indican las principales funciones utilizadas en el código j
 
 - Si el input será una dirección considere la forma: *vía numeración, comuna, país*
     - Ej: avenida tomas moro 20, las condes, chile
+
 - Si ingresa una dirección que si es de la comuna y el programa le dice que no, considere utilizar la opción por coordenadas.
-    - Ej:
-        - longitud: -70.55164
+    - Al escoger coordenadas, el programa solicitará primero longitud y luego latitud, considere sistema de referencia geodésico para las coordenadas (mismas que entrega Google Maps), para Chile ambos negativos y con un punto para los decimales.
+        - Ej:
+	- longitud: -70.55164
         - latitud: -33.40890
-        
-        **La coordenada debe ser *float*.**
         
 
 # Ejemplo Uso
 
-Interacción:
+Interacción (ingresa dirección):
 
 ```
 ¿Tienes una dirección o coordenadas? (1: dirección / 2: coordenadas): 1
 Ingrese la dirección: avenida tomas moro 20, las condes, chile
+```
+
+Interacción (ingresa coordenadas):
+
+```
+¿Tienes una dirección o coordenadas? (1: dirección / 2: coordenadas): 2
+Ingrese la longitud: -70.55164
+Ingrese la latitud: -33.40890
 ```
 
 Retorno:

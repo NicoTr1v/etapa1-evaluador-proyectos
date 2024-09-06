@@ -11,12 +11,12 @@ def cargar_datos(geojson_path, excel_path, crs='EPSG:4326'):
     '''Carga y procesa los archivos de la zonificación y normativa'''
     try:
         # Cargar los datos geoespaciales y de normativa
-        area = gpd.read_file(geojson_path).merge(pd.read_excel(excel_path), on='cod').to_crs(crs)
+        zonificacion = gpd.read_file(geojson_path).merge(pd.read_excel(excel_path), on='cod').to_crs(crs)
     except FileNotFoundError as e:
         print(f"Error al cargar archivos: {e}")
         # Si no se encuentran los archivos, se termina el programa
         sys.exit(1)
-    return area
+    return zonificacion
 
 def obtener_geometria():
     '''Obtiene un GeoDataFrame geometría Point según la elección del usuario (dirección o coordenadas)'''
@@ -50,10 +50,10 @@ def obtener_geometria():
     return gpd.GeoDataFrame(geometry=[Point(lon, lat)], crs='EPSG:4326')
 
 # Funciones de procesamiento 
-def procesar_zona(area, point):
+def procesar_zona(zonificacion, point):
     '''Realiza la intersección del punto con la zona y muestra la normativa correspondiente'''
     # zona_prc es el GeoDataFrame de la zona en la que se encuentra el punto
-    zona_prc = area[area.intersects(point.geometry.iloc[0])]
+    zona_prc = zonificacion[zonificacion.intersects(point.geometry.iloc[0])]
 
     # Si no se encuentra la zona, se termina el programa
     if zona_prc.empty:
@@ -87,19 +87,20 @@ def elige_normativa(zona_prc):
     opciones_out = opciones.rename(columns={
         'opcion': 'Opción',
         'normativa_edificacion': 'Normativa',
-        'subdivision_predial_minima': 'Subdivisión Predial Min',
-        'densidad_bruta_maxima': 'Densidad Bruta Max (hab/ha)',
+        'densidad_bruta_maxima': 'Densidad Bruta (hab/ha)',
         'constructibilidad': 'Coef. Constructibilidad',
         'ocupacion_1er_piso': 'Coef. Ocupación 1er Piso',
-        'altura_maxima_pisos': 'Altura Max (pisos)'})
+        'altura_maxima_pisos': 'Altura (pisos)',
+        'altura_maxima_mts': 'Altura (mts)',})
     
     #Los valores 9999 indican que la normativa en esa temática es Libre, reemplaza los 9999 por 'Libre'
     opciones_out.replace(9999, 'Libre', inplace=True)
     
     # Se muestra un DataFrame con las opciones de normativa residencial
     print("Las posibles combinaciones de normativa residencial a aplicar en la zona en la que se emplaza el terreno son las siguientes:")
-    print(opciones_out[['Opción', 'Normativa', 'Subdivisión Predial Min', 'Densidad Bruta Max (hab/ha)', 
-                            'Coef. Constructibilidad', 'Coef. Ocupación 1er Piso', 'Altura Max (pisos)']].to_string(index=False))
+    print(opciones_out[['Opción', 'Normativa', 'Densidad Bruta (hab/ha)', 
+                        'Coef. Constructibilidad', 'Coef. Ocupación 1er Piso', 
+                        'Altura (pisos)', 'Altura (mts)']].to_string(index=False))
     
     # Se muestra una observación adicional sobre la zona en la que se encuentra el terreno
     print('Además considere lo siguiente:')
@@ -116,50 +117,55 @@ def elige_normativa(zona_prc):
         except ValueError:
             print("Entrada no válida. Por favor, ingrese un número válido.")
 
-def ingresar_superficie():
-    '''Pide al usuario que ingrese la superficie del terreno'''
-    # Se pide al usuario que ingrese la superficie del terreno
+
+def calcular_restricciones(normativa_elegida):
+    '''Calcula las restricciones de la normativa según la superficie del terreno'''
+    # Pide la superficie de terreno al usuario
     while True:
         try:
             superficie = float(input('Ingrese la superficie del terreno (m2): '))
             break
         except ValueError:
             print("Entrada no válida. Por favor ingrese un valor numérico para la superficie.")
-    return superficie
-
-def calcular_restricciones(superficie, normativa_elegida):
-    '''Calcula las restricciones de la normativa según la superficie del terreno'''
+    
     # Se calculan las restricciones según la normativa y la superficie del terreno
     # Se calcula la cantidad máxima de viviendas permitidas
     if normativa_elegida['densidad_bruta_maxima'].iloc[0] == 9999:
         max_vi = 'Libre'
     else:
-        max_vi = ((normativa_elegida['densidad_bruta_maxima'].iloc[0] * (superficie/10000)) // 4)
+        max_vi = ((normativa_elegida['densidad_bruta_maxima'].iloc[0] * (superficie / 10000)) // 4)
 
-    # Calcula la superficie máxima permitida a construir
+    # Se calcula la superficie máxima permitida a construir
     max_surf = round(superficie * normativa_elegida['constructibilidad'].iloc[0], 3)
 
-    # Calcula la superficie mácima permitia a construir en el 1er piso
+    # Se calcula la superficie máxima permitida a construir en el 1er piso
     max_oc = round(superficie * normativa_elegida['ocupacion_1er_piso'].iloc[0], 3)
+
+    # Se calcula la altura máxima permitida
+    altura_mts_a_pisos = normativa_elegida['altura_maxima_mts'].iloc[0] / 2.5    # 2.5 mts por piso segun mercado inmobiliario, puede ser modificable
+    if altura_mts_a_pisos <= normativa_elegida['altura_maxima_pisos'].iloc[0]:
+        max_altura = round(altura_mts_a_pisos, 0) 
+    else:
+        max_altura = normativa_elegida['altura_maxima_pisos'].iloc[0]
 
     # Se muestran las restricciones calculadas
     print(f'La superficie máxima construible es de {max_surf} m2.')
     print(f'La ocupación máxima del suelo en el 1er piso es de {max_oc} m2.')
     print(f'La cantidad máxima de viviendas permitidas son {max_vi}.')
+    print(f'La altura máxima permitida es de {max_altura} pisos.')
+
 
 def main():
     # Cargar los datos geoespaciales y de normativa
-    area = cargar_datos('capas/zonas_geom.geojson', 'capas/normativa.xlsx')
+    zonificacion = cargar_datos('capas/zonas_geom.geojson', 'capas/normativa.xlsx')
     # Obtener la ubicación del usuario (por dirección o coordenadas)
     point = obtener_geometria()
     # Procesar la zona en función del punto
-    zona_prc = procesar_zona(area, point)
+    zona_prc = procesar_zona(zonificacion, point)
     # Elegir la normativa que se va a aplicar
     normativa_elegida = elige_normativa(zona_prc)
-    # Ingresar la superficie del terreno
-    superficie = ingresar_superficie()
     # Calcular y mostrar las restricciones según la normativa y superficie
-    calcular_restricciones(superficie, normativa_elegida)
+    calcular_restricciones(normativa_elegida)
 
 # Ejecutar el programa
 if __name__ == "__main__":
