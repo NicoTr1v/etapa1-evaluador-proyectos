@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/1609c62c-92b8-4677-9bea-942f17acc058)## Parte 1: Restricciones para Edificación
+# Etapa 1 Evaluador Proyectos
 
 # Descripción
 
@@ -22,7 +22,7 @@ A continuación se muestra el formato en que vienen los archivos en bruto antes 
 
 Como se menciona, la normativa específica de cada zona está explicada en distinto formatos, en este caso se muestra como viene en la [Ordenanza Plan Regulador Comunal de Las Condes](https://archivos.lascondes.cl/descargas/plano-regulador/2021_11_10_Texto_Refundido_Ordenanza_PRC_Exposicion_vf_exp.pdf). En la Imagen 1 se muestra un ejemplo para una zona específica dentro de la comuna, se muestran 2 posibles combinaciones de normativas, dadas por la *Tabla A) Base* y la *Tabla B) Proyectos de Densificación de Viviendas en Edificaciones Colectivas* 
 
-![    I*magen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*](![image](https://github.com/user-attachments/assets/a59402eb-4bed-49ee-97ab-22ad904134cc)
+(![image](https://github.com/user-attachments/assets/a59402eb-4bed-49ee-97ab-22ad904134cc)
 
 *Imagen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*
 
@@ -30,7 +30,7 @@ Como se menciona, la normativa específica de cada zona está explicada en disti
 
 Para que el script sea funcional es necesario que la información de cada normativa sea tabulada en un Excel.
 
-![          *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*](![image](https://github.com/user-attachments/assets/601a32bf-7f6d-480c-b365-dd4d1d043562)
+(https://github.com/user-attachments/assets/601a32bf-7f6d-480c-b365-dd4d1d043562)
 
 *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*
 
@@ -67,7 +67,7 @@ La Imagen 2 muestra el formato esperado para las combinaciones de normativas dis
 
 El otro archivo requerido es la capa geográfica que permite hacer la intersección entre la ubicación del terreno de interés y la zona en la que se emplaza. En el link asociado al MINVU (mencionado al principio de antecedentes) se ve como es el formato en el que viene este archivo, sin embargo, se espera que la capa geográfica para este script sea un GeoJSON con los campos de código (*cod*), comuna y el campo de geometría requerido para posteriormente.
 
-![                                      *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*](![image](https://github.com/user-attachments/assets/a1f67c1d-416d-45fe-8241-8e85e32ef171)
+(![image](https://github.com/user-attachments/assets/a1f67c1d-416d-45fe-8241-8e85e32ef171)
 
 *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*
 
@@ -140,7 +140,7 @@ La salida final del script es una visualización de las restricciones a para las
 
 A continuación se detalla el flujo del script en un diagrama de abstracción:
 
-![                                               *Imagen 4: Diagrama de abstracción para el script.*](![image](https://github.com/user-attachments/assets/a9995b65-f6a1-45ac-b0ac-499a427be05c)
+(https://github.com/user-attachments/assets/a9995b65-f6a1-45ac-b0ac-499a427be05c)
 
 
 *Imagen 4: Diagrama de abstracción para el script.*
