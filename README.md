@@ -243,7 +243,7 @@ A continuación, se indican las principales funciones utilizadas en el código j
 - Si ingresa una dirección que si es de la comuna y el programa le dice que no, considere utilizar la opción por coordenadas.
     - Al escoger coordenadas, el programa solicitará primero longitud y luego latitud, considere sistema de referencia geodésico para las coordenadas (mismas que entrega Google Maps), para Chile ambos negativos y con un punto para los decimales.
         - Ej:
-	- longitud: -70.55164
+        - longitud: -70.55164
         - latitud: -33.40890
         
 
@@ -283,13 +283,14 @@ Interacción:
 
 ```
 Ingrese el número de la opción de normativa que desea aplicar al terreno: 2
-Ingrese la superficie del terreno (m2): 1450
+Ingrese la superficie del terreno (m2): 12345
 ```
 
 Retorno
 
 ```
-La superficie máxima construible es de 3625.0 m2.
-La ocupación máxima del suelo en el 1er piso es de 435.0 m2.
-La cantidad máxima de viviendas permitidas son Libre.   
+La superficie máxima construible es de 30862.5 m2.
+La ocupación máxima del suelo en el 1er piso es de 3703.5 m2.
+La cantidad máxima de viviendas permitidas son Libre.
+La altura máxima permitida es de 7 pisos. 
 ```
