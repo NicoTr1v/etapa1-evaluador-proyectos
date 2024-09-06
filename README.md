@@ -12,6 +12,67 @@ El script permite al usuario ingresar una dirección o coordenadas para ubicar u
 
 ---
 
+# Antecedentes
+
+El principal obstáculo que enfrenta la automatización de este proceso es la disponibilidad y formatos de los Instrumentos de Planificación Territorial requeridos. Cada comuna tiene distintas Ordenanzas Locales donde especifican los coeficientes en distintas formas, ya sea tablas, párrafos de texto, etc. Por otro lado, la capa espacial que permite hacer el proceso terreno-normativa suele estar contenida en algún visor de la misma comuna o en el [servicio de mapas del Ministerio de Vivienda y Urbanismo.](https://geoide.minvu.cl/server/rest/services/IPT/PRC_Metropolitana/FeatureServer)
+
+A continuación se muestra el formato en que vienen los archivos en bruto antes de ser tratados y como se espera que esté disponible para la ejecución correcta del script.
+
+## Normativa de cada zona
+
+Como se menciona, la normativa específica de cada zona está explicada en distinto formatos, en este caso se muestra como viene en la [Ordenanza Plan Regulador Comunal de Las Condes](https://archivos.lascondes.cl/descargas/plano-regulador/2021_11_10_Texto_Refundido_Ordenanza_PRC_Exposicion_vf_exp.pdf). En la Imagen 1 se muestra un ejemplo para una zona específica dentro de la comuna, se muestran 2 posibles combinaciones de normativas, dadas por la *Tabla A) Base* y la *Tabla B) Proyectos de Densificación de Viviendas en Edificaciones Colectivas* 
+
+![    I*magen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*](https://prod-files-secure.s3.us-west-2.amazonaws.com/1c56be0e-168b-4c72-be0a-5931dd4f019f/3e33d496-1020-4416-9446-30b7648be94e/image.png)
+
+    I*magen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*
+
+### Forma esperada para el funcionamiento del script
+
+Para que el script sea funcional es necesario que la información de cada normativa sea tabulada en un Excel.
+
+![          *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*](https://prod-files-secure.s3.us-west-2.amazonaws.com/1c56be0e-168b-4c72-be0a-5931dd4f019f/531a1d73-f142-4c6e-b437-746dc34c7699/image.png)
+
+          *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*
+
+La Imagen 2 muestra el formato esperado para las combinaciones de normativas disponibles en una zona. Esta tabla debe componerse la siguientes columnas:
+
+- cod: (*str*) código que se compone de siglas uso de suelo/siglas zona edificación, este código no es único, ya que es un código que permite unir después a cada zona en la capa geográfica con todas las combinaciones de normativas disponibles y cada zona como bien muestra la Imagen 1, se tienen distintas combinaciones de normativa para cada cod.
+- uso_zona: (*str*) siglas asociadas al uso de suelo de la zona.
+- zona: (*str*) siglas de la zona.
+- nombre: (*str*) nombre y significado de las siglas de la zona.
+- uso_permitido: (*str*) uso permitido en la zona.
+- uso_prohibido:  (*str*)nuso prohibido en la zona.
+- obervacion:  (*str*)observación importante sobre la normativa de la zona.
+- normativa_edificacion: (*str*) tipo de normativa aplicable, puede ser: Residencial, Equipamiento, Densificación Residencial, Densificación no Residencial, Áreas verdes y Única. Para estas últimas está prohibido la edificación (el script lo explicita). También el script funciona solo para aplicación de tipo de normativa Residencial y Densificación Residencial.
+- subdivision_predial_minima: (float) Subdivisión predial mínima admitida en la zona.
+- subdivision_predial_maxima: (*float*) Subdivisión predial máxima admitida en la zona.
+- densidad_bruta_maxima: (float) Densidad Bruta Máxima en la zona, en habitantes/hectáreas, se considera 4 habitantes por vivienda (O.G.U.C).
+- constructibilidad:  (*float*) Coeficiente de Constructibilidad, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir sobre el terreno.
+- ocupacion_1er_piso:  (*float*) Coeficiente de Ocupación en el 1er Piso, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir en el primer piso.
+- ocupacion_2do_piso: (*float*) Coeficiente de Ocupación en el 2do Piso, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir en el segundo piso.
+- ocupacion_3er_piso: (*float*) Coeficiente de Ocupación en el 3er Piso, valor que multiplicado la superficie del terreno entrega la superficie máxima a construir en el tercer piso.
+- ocupacion_pisos_superiores: (*float*) Coeficiente de Ocupación en los pisos superiores.
+- altura_maxima_pisos: (*int*) altura máxima permitida en pisos, la O.G.U.C permite considerar hasta 3,5 metros por piso, sin embargo, en el mercado se suele usar 2,5 metros.
+- altura_maxima_mts: (*float*) altura máxima permitida en metros, aplicado con 3,5 metros por piso. En algunos casos se específica solo en pisos por lo que se hace el calculo con los valores ya mencionados, en otros específica ambos valores.
+- rasante: (*str*) Rasante de la edificación en grados.
+- agrupamiento: (*str*) Sistema de Agrupamiento de las edificaciones permitido.
+- antejardin: (*float*) espacio entre línea oficial de la vía y la edificación a dejar como Antejardín en metros.
+
+**A considerar:** 
+
+- **Los coeficientes de ocupación varían en cada comuna, en algunos se específica hasta el del 3er piso, otros solo 1er piso y superiores. Para el caso de Las Condes, solo se específica el coeficiente para el primer piso, lo que indica que la ocupación es pisos superiores está dada por lo restante entre lo que determina el coeficiente de constructibilidad.**
+- **Donde no hay valores se reemplazó con un “-”, además, si hay columnas que no tienen valores, significa que la comuna de Las Condes no los informa, sin embargo otras si, por lo que si se quiere hacer escalable a la Región Metropolitana se mantienen.**
+
+## Capa geográfica de la zonificación de la comuna
+
+El otro archivo requerido es la capa geográfica que permite hacer la intersección entre la ubicación del terreno de interés y la zona en la que se emplaza. En el link asociado al MINVU (mencionado al principio de antecedentes) se ve como es el formato en el que viene este archivo, sin embargo, se espera que la capa geográfica para este script sea un GeoJSON con los campos de código (*cod*), comuna y el campo de geometría requerido para posteriormente.
+
+![                                      *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*](https://prod-files-secure.s3.us-west-2.amazonaws.com/1c56be0e-168b-4c72-be0a-5931dd4f019f/11414230-962b-481a-a8ea-3f7de6068013/image.png)
+
+                                      *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*
+
+La Imagen 3 muestra como es la capa, cada zona tiene el código (*cod*), el cual no está hecho para una visualización atractiva, solo para entender como se compone la capa, en este caso la geometría es `MultiPolygon`, ya que se tienen distintos polígonos que representan una misma zona en distintas partes de la comuna.
+
 # Requisitos
 
 - Python 3.x
@@ -75,13 +136,13 @@ La salida final del script es una visualización de las restricciones a para las
 
 ---
 
-# Archivos requeridos
+# Diagrama de Abstracción de Procesos
 
-El script requiere de dos arcihvos e
+A continuación se detalla el flujo del script en un diagrama de abstracción:
 
-## Archivo GeoJSON Zonificación Comuna
+![                                               *Imagen 4: Diagrama de abstracción para el script.*](https://prod-files-secure.s3.us-west-2.amazonaws.com/1c56be0e-168b-4c72-be0a-5931dd4f019f/a2159b0c-e072-4eca-b851-a8b0dd694184/image.png)
 
-## Excel de Normativa de cada Zona
+                                               *Imagen 4: Diagrama de abstracción para el script.*
 
 ---
 
@@ -171,52 +232,58 @@ A continuación, se indican las principales funciones utilizadas en el código j
 - **Salida**:
     - No tiene salida directa, coordina la ejecución de las funciones.
 
+---
+
+# A considerar:
+
+- Si el input será una dirección considere la forma: *vía numeración, comuna, país*
+    - Ej: avenida tomas moro 20, las condes, chile
+- Si ingresa una dirección que si es de la comuna y el programa le dice que no, considere utilizar la opción por coordenadas.
+    - Ej:
+        - longitud: -70.55164
+        - latitud: -33.40890
+        
+        **La coordenada debe ser *float*.**
+        
+
 # Ejemplo Uso
 
-Parámetros de Entrada:
+Interacción:
 
-```json
-{
-    "parametros_entrada": {
-
-        "tipo_propiedad": "DEPARTAMENTO",
-        "tasa_prom": 2.64,
-        "vel_prom": 7.69,
-        "uso_habitacional_mixto": "HABITACIONAL",
-        "viviendas": 724,
-        "dist_metro": 528.62,
-        "cc": 32,
-        "tasa_interes": 1.9,
-        "comuna": "SANTIAGO",
-        "area_terreno": 2406.48,
-        "costo_terreno": 50,
-        "limite_superficie_construida": 18000
-    },
-
-    "parametros_ag": {
-
-        "NUM_CROMOSOMAS" : 10,  
-        "NUM_GENERACIONES" : 60,  
-        "NUM_TIPOLOGIAS" : 10  
-    },
-
-    "log_path" : "./log"
-}
+```python
+¿Tienes una dirección o coordenadas? (1: dirección / 2: coordenadas): 1
+Ingrese la dirección: avenida tomas moro 20, las condes, chile
 ```
 
 Retorno:
 
 ```python
-Mejor cromosoma encontrado: 
-[153, 0.11958100571401273, 0.09196688831173332, 0.16579238837191398, 0.013014441599349957, 0.09196688831173332, 0.03122844241325229, 0.2208641957095921, 0.16563061636333495, 0.07710081003826087, 0.02285432316681647] 
-con un VPN de 839235.3544256077 y un Precio Predicho de 10812.253664998163
+El terreno se emplaza en:
+- Uso Suelo: UC1
+- Zona Edificación: EAm1p
+- Nombre: UC1/EAm1p Zona de Uso de Comercio N°1 e Instituciones Comunal/ Edificación Aislada Media N°1 Prima
+Las posibles combinaciones de normativa residencial a aplicar en la zona en la que se emplaza el terreno son las siguientes:
+ Opción             Normativa      Subdivisión Predial Min      Densidad Bruta Max (hab/ha)    Coef. Constructibilidad       Coef. Ocupación 1er Piso    Altura Max (pisos)
+      1               Residencial           2500                        20                                0.6                         0.4                      3
+      2   Densificación Residencial         1500                       Libre                              2.5                         0.3                      7
+Además considere lo siguiente:
+En todos los casos, la edificación podrá acogerse sólo a una de las tablas precedentes y, en el deslinde de contrafrente, deberá cumplir un distanciamiento mínimo 
+de 18 metros con los predios que pertenezcan parcialmente al área de edificación E-Ab1 y de 12 metros con predios que pertenezcan parcialmente al área de edificación 
+E-Ab2, E-Ab3, distancia que será medida desde el eje del deslinde y en toda su longitud. Para efectos de calificar si el predio pertenece a las áreas de edificación 
+E-Ab1, E-Ab2 o E-Ab3, se considerará cualquier predio que contenga total o parcialmente alguna de estas áreas.
+```
 
-{'Mejor VPN': 839235.3544256077, 
-'Mejor Precio Predicho': 10812.253664998163, 
-'Mejor Cromosoma': 
-[153, 0.11958100571401273, 0.09196688831173332, 0.16579238837191398, 0.013014441599349957, 0.09196688831173332, 0.03122844241325229, 0.2208641957095921, 0.16563061636333495, 0.07710081003826087, 0.02285432316681647], 
-'Configuración': {
-		'n_unidades': 153, 
-		'Porcentajes de Tipologías': [0.11958100571401273, 0.09196688831173332, 0.16579238837191398, 0.013014441599349957, 0.09196688831173332, 0.03122844241325229, 0.2208641957095921, 0.16563061636333495, 0.07710081003826087, 0.02285432316681647]}, 
-		'Superficie Construida': 17815.366117228492}
+Interacción:
+
+```python
+Ingrese el número de la opción de normativa que desea aplicar al terreno: 2
+Ingrese la superficie del terreno (m2): 1450
+```
+
+Retorno
+
+```python
+La superficie máxima construible es de 3625.0 m2.
+La ocupación máxima del suelo en el 1er piso es de 435.0 m2.
+La cantidad máxima de viviendas permitidas son Libre.   
 ```
