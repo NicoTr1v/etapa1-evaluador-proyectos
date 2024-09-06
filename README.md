@@ -24,7 +24,7 @@ Como se menciona, la normativa específica de cada zona está explicada en disti
 
 ![    I*magen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*](![image](https://github.com/user-attachments/assets/a59402eb-4bed-49ee-97ab-22ad904134cc)
 
-    I*magen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*
+*Imagen 1: Tablas con distintas combinaciones de normativas aplicables a una zona.*
 
 ### Forma esperada para el funcionamiento del script
 
@@ -32,7 +32,7 @@ Para que el script sea funcional es necesario que la información de cada normat
 
 ![          *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*](![image](https://github.com/user-attachments/assets/601a32bf-7f6d-480c-b365-dd4d1d043562)
 
-          *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*
+*Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*
 
 La Imagen 2 muestra el formato esperado para las combinaciones de normativas disponibles en una zona. Esta tabla debe componerse la siguientes columnas:
 
@@ -69,7 +69,7 @@ El otro archivo requerido es la capa geográfica que permite hacer la intersecci
 
 ![                                      *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*](![image](https://github.com/user-attachments/assets/a1f67c1d-416d-45fe-8241-8e85e32ef171)
 
-                                      *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*
+*Imagen 3: Formato esperado para capa geográfica (GeoJSON).*
 
 La Imagen 3 muestra como es la capa, cada zona tiene el código (*cod*), el cual no está hecho para una visualización atractiva, solo para entender como se compone la capa, en este caso la geometría es `MultiPolygon`, ya que se tienen distintos polígonos que representan una misma zona en distintas partes de la comuna.
 
@@ -140,9 +140,10 @@ La salida final del script es una visualización de las restricciones a para las
 
 A continuación se detalla el flujo del script en un diagrama de abstracción:
 
-![                                               *Imagen 4: Diagrama de abstracción para el script.*](https://prod-files-secure.s3.us-west-2.amazonaws.com/1c56be0e-168b-4c72-be0a-5931dd4f019f/a2159b0c-e072-4eca-b851-a8b0dd694184/image.png)
+![                                               *Imagen 4: Diagrama de abstracción para el script.*](![image](https://github.com/user-attachments/assets/a9995b65-f6a1-45ac-b0ac-499a427be05c)
 
-                                               *Imagen 4: Diagrama de abstracción para el script.*
+
+*Imagen 4: Diagrama de abstracción para el script.*
 
 ---
 
