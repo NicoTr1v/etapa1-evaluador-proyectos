@@ -272,14 +272,11 @@ El terreno se emplaza en:
 - Zona Edificación: EAm1p
 - Nombre: UC1/EAm1p Zona de Uso de Comercio N°1 e Instituciones Comunal/ Edificación Aislada Media N°1 Prima
 Las posibles combinaciones de normativa residencial a aplicar en la zona en la que se emplaza el terreno son las siguientes:
- Opción             Normativa      Subdivisión Predial Min      Densidad Bruta Max (hab/ha)    Coef. Constructibilidad       Coef. Ocupación 1er Piso    Altura Max (pisos)
-      1               Residencial           2500                        20                                0.6                         0.4                      3
-      2   Densificación Residencial         1500                       Libre                              2.5                         0.3                      7
+ Opción                 Normativa Densidad Bruta (hab/ha) Coef. Constructibilidad Coef. Ocupación 1er Piso Altura (pisos) Altura (mts)
+      1               Residencial                      20                     0.6                      0.4              3         10.5
+      2 Densificación Residencial                   Libre                     2.5                      0.3              7           21
 Además considere lo siguiente:
-En todos los casos, la edificación podrá acogerse sólo a una de las tablas precedentes y, en el deslinde de contrafrente, deberá cumplir un distanciamiento mínimo 
-de 18 metros con los predios que pertenezcan parcialmente al área de edificación E-Ab1 y de 12 metros con predios que pertenezcan parcialmente al área de edificación 
-E-Ab2, E-Ab3, distancia que será medida desde el eje del deslinde y en toda su longitud. Para efectos de calificar si el predio pertenece a las áreas de edificación 
-E-Ab1, E-Ab2 o E-Ab3, se considerará cualquier predio que contenga total o parcialmente alguna de estas áreas.
+En todos los casos, la edificación podrá acogerse sólo a una de las tablas precedentes y, en el deslinde de contrafrente, deberá cumplir un distanciamiento mínimo de 18 metros con los predios que pertenezcan parcialmos con predios que pertenezcan parcialmente al área de edificación E-Ab2, E-Ab3, distancia que será medida desde el eje del deslinde y en toda su longitud. Para efectos de calificar si el predio pertenece a las áreasderará cualquier predio que contenga total o parcialmente alguna de estas áreas.
 ```
 
 Interacción:
