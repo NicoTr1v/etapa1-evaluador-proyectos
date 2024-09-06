@@ -30,7 +30,7 @@ Como se menciona, la normativa específica de cada zona está explicada en disti
 
 Para que el script sea funcional es necesario que la información de cada normativa sea tabulada en un Excel.
 
-(https://github.com/user-attachments/assets/601a32bf-7f6d-480c-b365-dd4d1d043562)
+(![image](https://github.com/user-attachments/assets/601a32bf-7f6d-480c-b365-dd4d1d043562)
 
 *Imagen 2: Formato esperado para las distintas combinaciones de normativa (filtrado para zona E-Ab1).*
 
@@ -67,7 +67,7 @@ La Imagen 2 muestra el formato esperado para las combinaciones de normativas dis
 
 El otro archivo requerido es la capa geográfica que permite hacer la intersección entre la ubicación del terreno de interés y la zona en la que se emplaza. En el link asociado al MINVU (mencionado al principio de antecedentes) se ve como es el formato en el que viene este archivo, sin embargo, se espera que la capa geográfica para este script sea un GeoJSON con los campos de código (*cod*), comuna y el campo de geometría requerido para posteriormente.
 
-(![image](https://github.com/user-attachments/assets/a1f67c1d-416d-45fe-8241-8e85e32ef171)
+(![image](![image](https://github.com/user-attachments/assets/a1f67c1d-416d-45fe-8241-8e85e32ef171)
 
 *Imagen 3: Formato esperado para capa geográfica (GeoJSON).*
 
@@ -140,7 +140,7 @@ La salida final del script es una visualización de las restricciones a para las
 
 A continuación se detalla el flujo del script en un diagrama de abstracción:
 
-(https://github.com/user-attachments/assets/a9995b65-f6a1-45ac-b0ac-499a427be05c)
+(![image](https://github.com/user-attachments/assets/a9995b65-f6a1-45ac-b0ac-499a427be05c)
 
 
 *Imagen 4: Diagrama de abstracción para el script.*
@@ -251,14 +251,14 @@ A continuación, se indican las principales funciones utilizadas en el código j
 
 Interacción:
 
-```python
+```
 ¿Tienes una dirección o coordenadas? (1: dirección / 2: coordenadas): 1
 Ingrese la dirección: avenida tomas moro 20, las condes, chile
 ```
 
 Retorno:
 
-```python
+```
 El terreno se emplaza en:
 - Uso Suelo: UC1
 - Zona Edificación: EAm1p
@@ -276,14 +276,14 @@ E-Ab1, E-Ab2 o E-Ab3, se considerará cualquier predio que contenga total o parc
 
 Interacción:
 
-```python
+```
 Ingrese el número de la opción de normativa que desea aplicar al terreno: 2
 Ingrese la superficie del terreno (m2): 1450
 ```
 
 Retorno
 
-```python
+```
 La superficie máxima construible es de 3625.0 m2.
 La ocupación máxima del suelo en el 1er piso es de 435.0 m2.
 La cantidad máxima de viviendas permitidas son Libre.   
