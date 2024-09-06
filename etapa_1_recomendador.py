@@ -149,7 +149,7 @@ def calcular_restricciones(superficie, normativa_elegida):
 
 def main():
     # Cargar los datos geoespaciales y de normativa
-    area = cargar_datos('capas/zonas_geom.geojson', 'capas/normativa_residencial.xlsx')
+    area = cargar_datos('capas/zonas_geom.geojson', 'capas/normativa.xlsx')
     # Obtener la ubicación del usuario (por dirección o coordenadas)
     point = obtener_geometria()
     # Procesar la zona en función del punto
