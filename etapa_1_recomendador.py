@@ -108,7 +108,7 @@ def elige_normativa(zona_prc):
     # Se pide al usuario que elija una de las opciones para aplicar la normativa al terreno que tiene
     while True:
         try:
-            eleccion = int(input("Ingrese el número de la normativa que desea aplicar al terreno: "))
+            eleccion = int(input("Ingrese el número de la opción de normativa que desea aplicar al terreno: "))
             if eleccion in opciones['opcion'].values:
                 return opciones[opciones['opcion'] == eleccion]
             else:
